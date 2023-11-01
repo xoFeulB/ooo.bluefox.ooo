@@ -1,31 +1,6 @@
-/******/ // The require scope
-/******/ var __webpack_require__ = {};
-/******/ 
-/************************************************************************/
-/******/ /* webpack/runtime/define property getters */
-/******/ (() => {
-/******/ 	// define getter functions for harmony exports
-/******/ 	__webpack_require__.d = (exports, definition) => {
-/******/ 		for(var key in definition) {
-/******/ 			if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 			}
-/******/ 		}
-/******/ 	};
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/hasOwnProperty shorthand */
-/******/ (() => {
-/******/ 	__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ })();
-/******/ 
-/************************************************************************/
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
 var __webpack_exports__ = {};
-
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, {
-  h: () => (/* binding */ BlueFoxJs)
-});
 
 ;// CONCATENATED MODULE: ./src/BlueFoxJs/Util/GetProperty.js
 
@@ -65,6 +40,33 @@ const deepFreeze = (object) => {
     }
   }
   return Object.freeze(object);
+};
+
+;// CONCATENATED MODULE: ./src/BlueFoxJs/Util/JSON.js
+
+const getAllPath = (_obj, _sep = ".") => {
+  if (typeof _obj !== "object") {
+    return [];
+  }
+
+  let paths = [];
+  for (let key in _obj) {
+    let val = _obj[key];
+    if (typeof val === "object") {
+      let subPaths = getAllPath(val);
+      subPaths.forEach((e) => {
+        paths.push({
+          path: [key, e.path].join("."),
+          value: e.value,
+          type: typeof e.value,
+        });
+      });
+    } else {
+      let path = { path: key, value: val, type: typeof val };
+      paths.push(path);
+    }
+  }
+  return paths;
 };
 
 ;// CONCATENATED MODULE: ./src/BlueFoxJs/Walker/WalkHorizontally.js
@@ -255,6 +257,7 @@ const view = async (_scope_ = document) => {
           to: to_element,
           toProperty: to.slice(1).join(separator),
           events: event,
+          entryNop: syncer.entryNop,
           init: init,
         };
 
@@ -280,7 +283,7 @@ const view = async (_scope_ = document) => {
             SyncView.to.dispatchEvent(new Event("sync"));
           });
         });
-        SyncView.sync();
+        SyncView.entryNop ? null : SyncView.sync();
         _.element.SyncView.Syncs.push(SyncView);
       };
 
@@ -344,11 +347,13 @@ const value = async (values = {}, _scope_ = document) => {
 
 
 
+
 ("use strict");
 const BlueFoxJs = (() => {
   let BlueFoxJs = {
     Util: {
       getProperty: getProperty,
+      getAllPath: getAllPath,
     },
     Walker: {
       walkHorizontally: walkHorizontally,
@@ -362,5 +367,15 @@ const BlueFoxJs = (() => {
   return deepFreeze(BlueFoxJs);
 })();
 
-var __webpack_exports__BlueFoxJs = __webpack_exports__.h;
-export { __webpack_exports__BlueFoxJs as BlueFoxJs };
+;// CONCATENATED MODULE: ./src/BlueFoxJs/index.js
+
+
+("use strict");
+window.dispatchEvent(
+  new CustomEvent("BlueFoxJs@Ready", {
+    detail: { BlueFoxJs: BlueFoxJs },
+  })
+);
+
+/******/ })()
+;
