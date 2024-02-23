@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>8bit pattern</title>
+    <meta charset="utf-8">
+    <style>
+        [out] {
+            font-weight: bold;
+        }
+
+        input {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div container>
+        <h1 out></h1>
+        <div>
+            <div>
+                <input data-testid="B08" type="checkbox" value="128">
+                <input data-testid="B07" type="checkbox" value="64">
+                <input data-testid="B06" type="checkbox" value="32">
+                <input data-testid="B05" type="checkbox" value="16">
+                <input data-testid="B04" type="checkbox" value="8">
+                <input data-testid="B03" type="checkbox" value="4">
+                <input data-testid="B02" type="checkbox" value="2">
+                <input data-testid="B01" type="checkbox" value="1">
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+<script defer>
+    class QueryWalker {
+        constructor(oDict, rootElement) {
+            this.oDict = oDict;
+            this.rootElement = rootElement;
+        }
+
+        async do(selectorTarget) {
+            if (!selectorTarget) {
+                selectorTarget = this.rootElement;
+            }
+            for (let selector in this.oDict) {
+                let elements = selectorTarget.querySelectorAll(selector);
+                for (let e of elements) {
+                    try {
+                        await this.oDict[selector](e);
+                    } catch (ex) {
+                        console.warn("QueryWalker |", ex);
+                    }
+                }
+            }
+        }
+    }
+    {
+        (async () => {
+            log = console.log;
+            let getRandomInt = (min, max) => {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min) + min);
+            }
+
+            (new QueryWalker({
+                "[container]": async (e) => {
+                    let out = document.querySelector("[out]");
+                    let inputs = e.querySelectorAll("input");
+
+                    let calc = (event) => {
+                        out.textContent = `#${("00" + [...inputs]
+                            .filter(_ => { return _.checked })
+                            .map(_ => { return Number(_.value) })
+                            .reduce((sum, element) => {
+                                return sum + element;
+                            }, 0).toString(16).toUpperCase()).substr(-2)}`;
+                    };
+
+                    [...inputs].forEach(_ => {
+                        _.addEventListener("click", calc);
+                    });
+                    [...inputs].forEach(_ => {
+                        _.addEventListener("mouseover", calc);
+                    });
+                    calc(new Event("mouseover"))
+                }
+            }, document)).do();
+        })();
+    }
+</script>
