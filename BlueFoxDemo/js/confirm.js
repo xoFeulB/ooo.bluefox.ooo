@@ -1,0 +1,1 @@
+window.confirm("^.,.^ BlueFox from ooo.bluefox.ooo");
